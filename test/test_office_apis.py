@@ -6,8 +6,7 @@ from datetime import datetime
 BASE_URL = "http://localhost:8080/office"
 
 
-# Fixture to add an office and yield its officeId
-@pytest.fixture
+@pytest.fixture()
 def add_and_delete_office():
     new_office = {
         "name": 'Test_Office',
@@ -26,8 +25,6 @@ def add_and_delete_office():
     print("office deleted")
 
 
-
-
 def test_get_all_offices():
     response = requests.get(BASE_URL)
     assert response.status_code == 200
@@ -37,10 +34,6 @@ def test_get_all_offices():
 
 
 def test_get_office_by_id(add_and_delete_office):
-    # # add office first
-    # new_office_response = add_office()
-    # assert new_office_response.status_code == 201
-
     officeId = add_and_delete_office
     response = requests.get(f"{BASE_URL}/{officeId}")
     assert response.status_code == 200
@@ -52,8 +45,6 @@ def test_get_office_by_id(add_and_delete_office):
     assert "totalRooms" in office
     assert officeId == office["officeId"]
 
-    # response = delete_office(officeId)
-    # assert response.status_code==200
 
 def test_add_office():
     new_office = {
@@ -85,10 +76,6 @@ def test_remove_office():
 
 
 def test_update_office_details(add_and_delete_office):
-    # new_office_response = add_office()
-    # assert new_office_response.status_code == 201
-    # office = new_office_response.json()
-    # office_id = office["officeId"]
     office_id = add_and_delete_office
 
     updated_office = {

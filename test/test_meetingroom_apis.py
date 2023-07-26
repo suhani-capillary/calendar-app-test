@@ -5,6 +5,22 @@ from datetime import datetime
 
 BASE_URL = "http://localhost:8080/meeting-room"
 
+@pytest.fixture()
+def add_and_delete_meeting_room():
+    new_meeting_room = {
+        "name": 'Test_Meeting_Room',
+        "capacity": 10,
+        "officeId": 101
+    }
+    new_meeting_room_response = requests.post(BASE_URL, json=new_meeting_room)
+    assert new_meeting_room_response.status_code == 201
+    print("meeting_room created")
+    meeting_room = new_meeting_room_response.json()
+
+    yield meeting_room["roomId"]
+    response = requests.delete(BASE_URL + f"/{meeting_room['roomId']}")
+    assert response.status_code == 200
+    print("meeting_room deleted")
 
 def test_get_all_meeting_rooms():
     response = requests.get(BASE_URL)
@@ -14,10 +30,9 @@ def test_get_all_meeting_rooms():
     assert len(meeting_rooms) >= 0
 
 
-def test_get_meeting_room_by_id():
-    new_meeting_room_response = add_meeting_room()
-    assert new_meeting_room_response.status_code == 201
-    roomId = new_meeting_room_response.json()['roomId']
+def test_get_meeting_room_by_id(add_and_delete_meeting_room):
+
+    roomId = add_and_delete_meeting_room
     response = requests.get(f"{BASE_URL}/{roomId}")
     assert response.status_code == 200
     meeting_room = response.json()
@@ -58,11 +73,9 @@ def test_remove_meeting_room():
     assert response.status_code == 404
 
 
-def test_update_meeting_room_details():
-    new_meeting_room_response = add_meeting_room()
-    assert new_meeting_room_response.status_code == 201
-    meeting_room = new_meeting_room_response.json()
-    roomId = meeting_room["roomId"]
+def test_update_meeting_room_details(add_and_delete_meeting_room):
+
+    roomId = add_and_delete_meeting_room
 
     updated_meeting_room = {
         "name": 'Updated_Meeting_Room',

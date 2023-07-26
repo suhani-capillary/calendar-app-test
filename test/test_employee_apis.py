@@ -5,6 +5,23 @@ from datetime import datetime
 
 BASE_URL = "http://localhost:8080/employee"
 
+@pytest.fixture()
+def add_and_delete_employee():
+    new_employee = {
+        "name": 'Test_User',
+        "email": 'TestUser' + str(datetime.now()) + '@gmail.com',
+        "officeId": 101,
+        "dob": '2001-10-20'
+    }
+    new_employee_response = requests.post(BASE_URL, json=new_employee)
+    assert new_employee_response.status_code == 201
+    print("employee added")
+    employee = new_employee_response.json()
+
+    yield employee
+    response = requests.delete(BASE_URL + f"/{employee['empId']}")
+    assert response.status_code == 200
+    print("employee removed")
 
 def test_get_all_employees():
     response = requests.get(BASE_URL)
@@ -14,10 +31,9 @@ def test_get_all_employees():
     assert len(employees) >= 0
 
 
-def test_get_employee_by_email():
-    new_employee_response = add_employee()
-    assert new_employee_response.status_code == 201
-    email = new_employee_response.json()['email']
+def test_get_employee_by_email(add_and_delete_employee):
+
+    email = add_and_delete_employee['email']
     response = requests.get(BASE_URL + "/email/" + email)
     assert response.status_code == 200
     employee = response.json()
@@ -58,10 +74,9 @@ def test_remove_employee():
     assert response.status_code == 404
 
 
-def test_update_employee_details():
-    new_employee_response = add_employee()
-    assert new_employee_response.status_code == 201
-    employee = new_employee_response.json()
+def test_update_employee_details(add_and_delete_employee):
+
+    employee = add_and_delete_employee
     emp_id = employee["empId"]
 
     updated_employee = {
